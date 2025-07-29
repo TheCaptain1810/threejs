@@ -12,7 +12,7 @@ const scene = new THREE.Scene();
 
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 
-const material = new THREE.MeshStandardMaterial();
+const material = new THREE.MeshPhysicalMaterial();
 material.color = new THREE.Color(0x00ff00);
 
 pane
@@ -33,6 +33,26 @@ pane
   })
   .on("change", (ev) => {
     material.roughness = ev.value;
+  });
+
+pane
+  .addBinding(material, "reflectivity", {
+    min: 0,
+    max: 1,
+    step: 0.01,
+  })
+  .on("change", (ev) => {
+    material.reflectivity = ev.value;
+  });
+
+pane
+  .addBinding(material, "clearcoat", {
+    min: 0,
+    max: 1,
+    step: 0.01,
+  })
+  .on("change", (ev) => {
+    material.clearcoat = ev.value;
   });
 
 // const params = {
