@@ -4,17 +4,18 @@ import { Pane } from "tweakpane";
 
 const pane = new Pane();
 
+// Scene
 const scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xffffff);
 
 // const fog = new THREE.Fog(0xffffff, 1, 10);
 // scene.fog = fog;
 
-const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-
+// Materials
 const material = new THREE.MeshPhysicalMaterial();
 material.color = new THREE.Color(0x00ff00);
 
+// Panes
 pane
   .addBinding(material, "metalness", {
     min: 0,
@@ -69,32 +70,51 @@ pane
 //     material.shininess = ev.value;
 //   });
 
-const triangleGeometry = new THREE.BufferGeometry();
-const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
-const bufferAttribute = new THREE.BufferAttribute(vertices, 3);
-triangleGeometry.setAttribute("position", bufferAttribute);
+// Geometries
+// const triangleGeometry = new THREE.BufferGeometry();
+// const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
+// const bufferAttribute = new THREE.BufferAttribute(vertices, 3);
+// triangleGeometry.setAttribute("position", bufferAttribute);
 
-const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
-
+const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
 const torusKnotGeometry = new THREE.TorusKnotGeometry(0.5, 0.15, 100, 16);
+const planeGeometry = new THREE.PlaneGeometry(1, 1);
+const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+
+// Groups
+const group = new THREE.Group();
+
+// Meshes
+// const triangle = new THREE.Mesh(triangleGeometry, material);
+const plane = new THREE.Mesh(planeGeometry, material);
+plane.position.x = -1.5;
 
 const cube = new THREE.Mesh(cubeGeometry, material);
-const triangle = new THREE.Mesh(triangleGeometry, material);
-const sphere = new THREE.Mesh(sphereGeometry, material);
+
 const torusKnot = new THREE.Mesh(torusKnotGeometry, material);
+torusKnot.position.x = 1.5;
 
-// scene.add(cube);
+const sphere = new THREE.Mesh(sphereGeometry, material);
+sphere.position.y = 1.5;
+
+const cylinder = new THREE.Mesh(cylinderGeometry, material);
+cylinder.position.y = -1.5;
+
 // scene.add(triangle);
-// scene.add(sphere);
-scene.add(torusKnot);
+group.add(plane, cube, sphere, torusKnot, cylinder);
+scene.add(group);
 
+// Renderer
 const canvas = document.querySelector("canvas.threejs");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
+// Axes
 const axes = new THREE.AxesHelper(3);
 scene.add(axes);
 
+// Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
 scene.add(ambientLight);
 
@@ -102,6 +122,7 @@ const pointLight = new THREE.PointLight(0xffffff, 100);
 pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
+// Camera
 const camera = new THREE.PerspectiveCamera(
   35,
   window.innerWidth / window.innerHeight,
@@ -110,6 +131,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 5;
 
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 
 window.addEventListener("resize", () => {
@@ -119,6 +141,9 @@ window.addEventListener("resize", () => {
 });
 
 const renderLoop = () => {
+  group.children.forEach((child) => {
+    child.rotation.y += 0.01;
+  });
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(renderLoop);
