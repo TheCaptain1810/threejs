@@ -11,22 +11,28 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.z = 2;
 
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-const cubeMaterial = new THREE.MeshBasicMaterial({
+const material = new THREE.MeshBasicMaterial({
   color: "red",
-  wireframe: true,
+  transparent: true,
+  opacity: 0.5,
+  side: THREE.DoubleSide,
 });
 
 const triangleGeometry = new THREE.BufferGeometry();
 const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
 const bufferAttribute = new THREE.BufferAttribute(vertices, 3);
 
+const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+
 triangleGeometry.setAttribute("position", bufferAttribute);
 
-const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-const triangle = new THREE.Mesh(triangleGeometry, cubeMaterial);
+const cube = new THREE.Mesh(cubeGeometry, material);
+const triangle = new THREE.Mesh(triangleGeometry, material);
+const sphere = new THREE.Mesh(sphereGeometry, material);
 
 scene.add(cube);
 scene.add(triangle);
+scene.add(sphere);
 
 const canvas = document.querySelector("canvas.threejs");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
