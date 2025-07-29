@@ -16,15 +16,26 @@ const cubeMaterial = new THREE.MeshBasicMaterial({
   wireframe: true,
 });
 
+const triangleGeometry = new THREE.BufferGeometry();
+const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
+const bufferAttribute = new THREE.BufferAttribute(vertices, 3);
+
+triangleGeometry.setAttribute("position", bufferAttribute);
+
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+const triangle = new THREE.Mesh(triangleGeometry, cubeMaterial);
 
 scene.add(cube);
+scene.add(triangle);
 
 const canvas = document.querySelector("canvas.threejs");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const controls = new OrbitControls(camera, renderer.domElement);
+
+const axes = new THREE.AxesHelper(3);
+scene.add(axes);
 
 window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
