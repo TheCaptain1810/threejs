@@ -12,22 +12,42 @@ const scene = new THREE.Scene();
 
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 
-const material = new THREE.MeshPhongMaterial();
-material.shininess = 90;
-
-const params = {
-  shininess: 90,
-};
+const material = new THREE.MeshStandardMaterial();
+material.color = new THREE.Color(0x00ff00);
 
 pane
-  .addBinding(params, "shininess", {
+  .addBinding(material, "metalness", {
     min: 0,
-    max: 100,
-    step: 1,
+    max: 1,
+    step: 0.01,
   })
   .on("change", (ev) => {
-    material.shininess = ev.value;
+    material.metalness = ev.value;
   });
+
+pane
+  .addBinding(material, "roughness", {
+    min: 0,
+    max: 1,
+    step: 0.01,
+  })
+  .on("change", (ev) => {
+    material.roughness = ev.value;
+  });
+
+// const params = {
+//   shininess: 90,
+// };
+
+// pane
+//   .addBinding(params, "shininess", {
+//     min: 0,
+//     max: 100,
+//     step: 1,
+//   })
+//   .on("change", (ev) => {
+//     material.shininess = ev.value;
+//   });
 
 const triangleGeometry = new THREE.BufferGeometry();
 const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
