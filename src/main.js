@@ -1,152 +1,263 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Pane } from "tweakpane";
 
+// initialize the pane
 const pane = new Pane();
 
-// Scene
+// initialize the scene
 const scene = new THREE.Scene();
-// scene.background = new THREE.Color(0xffffff);
 
-// const fog = new THREE.Fog(0xffffff, 1, 10);
-// scene.fog = fog;
+// initialize the loader
+const textureLoader = new THREE.TextureLoader();
 
-// Materials
-const material = new THREE.MeshPhysicalMaterial();
-material.color = new THREE.Color(0x00ff00);
+// initialize the geometry
+const geometry = new THREE.SphereGeometry(1, 32, 32);
+const uv2Geometry = new THREE.BufferAttribute(geometry.attributes.uv.array, 2);
+geometry.setAttribute("uv2", uv2Geometry);
 
-// Panes
-pane
-  .addBinding(material, "metalness", {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  })
-  .on("change", (ev) => {
-    material.metalness = ev.value;
-  });
+// load the grass textures
+const grassAlbedo = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_albedo.png"
+);
+grassAlbedo.colorSpace = THREE.SRGBColorSpace;
+const grassAo = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_ao.png"
+);
+const grassHeight = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_height.png"
+);
+const grassMetallic = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_metallic.png"
+);
+const grassNormal = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_normal-ogl.png"
+);
+const grassRoughness = textureLoader.load(
+  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_roughness.png"
+);
 
-pane
-  .addBinding(material, "roughness", {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  })
-  .on("change", (ev) => {
-    material.roughness = ev.value;
-  });
+// load the boulder textures
+const boulderAlbedo = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_albedo.png"
+);
+boulderAlbedo.colorSpace = THREE.SRGBColorSpace;
+const boulderAo = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_ao.png"
+);
+const boulderHeight = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_height.png"
+);
+const boulderMetallic = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_metallic.png"
+);
+const boulderNormal = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_normal-ogl.png"
+);
+const boulderRoughness = textureLoader.load(
+  "static/textures/badlands-boulders-bl/badlands-boulders_roughness.png"
+);
 
-pane
-  .addBinding(material, "reflectivity", {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  })
-  .on("change", (ev) => {
-    material.reflectivity = ev.value;
-  });
+// load the space cruiser textures
+const spaceCruiserAlbedo = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_albedo.png"
+);
+spaceCruiserAlbedo.colorSpace = THREE.SRGBColorSpace;
+const spaceCruiserAo = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_ao.png"
+);
+const spaceCruiserHeight = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_height.png"
+);
+const spaceCruiserMetallic = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_metallic.png"
+);
+const spaceCruiserNormal = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_normal-ogl.png"
+);
+const spaceCruiserRoughness = textureLoader.load(
+  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_roughness.png"
+);
 
-pane
-  .addBinding(material, "clearcoat", {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  })
-  .on("change", (ev) => {
-    material.clearcoat = ev.value;
-  });
+// grass material
+const grassPane = pane.addFolder({
+  title: "Grass Material",
+  expanded: true,
+});
 
-// const params = {
-//   shininess: 90,
-// };
+const grassMaterial = new THREE.MeshStandardMaterial();
+grassMaterial.map = grassAlbedo;
+grassMaterial.roughnessMap = grassRoughness;
+grassMaterial.metalnessMap = grassMetallic;
+grassMaterial.normalMap = grassNormal;
+grassMaterial.displacementMap = grassHeight;
+grassMaterial.displacementScale = 0.1;
+grassMaterial.aoMap = grassAo;
 
-// pane
-//   .addBinding(params, "shininess", {
-//     min: 0,
-//     max: 100,
-//     step: 1,
-//   })
-//   .on("change", (ev) => {
-//     material.shininess = ev.value;
-//   });
+grassPane.addBinding(grassMaterial, "metalness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+grassPane.addBinding(grassMaterial, "roughness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+grassPane.addBinding(grassMaterial, "displacementScale", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+grassPane.addBinding(grassMaterial, "aoMapIntensity", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
 
-// Geometries
-// const triangleGeometry = new THREE.BufferGeometry();
-// const vertices = new Float32Array([0, 0, 0, 0, 2, 0, 2, 0, 0]);
-// const bufferAttribute = new THREE.BufferAttribute(vertices, 3);
-// triangleGeometry.setAttribute("position", bufferAttribute);
+// boulder material
+const boulderPane = pane.addFolder({
+  title: "Boulder Material",
+  expanded: true,
+});
 
-const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-const torusKnotGeometry = new THREE.TorusKnotGeometry(0.5, 0.15, 100, 16);
-const planeGeometry = new THREE.PlaneGeometry(1, 1);
-const cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+const boulderMaterial = new THREE.MeshStandardMaterial();
+boulderMaterial.map = boulderAlbedo;
+boulderMaterial.roughnessMap = boulderRoughness;
+boulderMaterial.metalnessMap = boulderMetallic;
+boulderMaterial.normalMap = boulderNormal;
+boulderMaterial.displacementMap = boulderHeight;
+boulderMaterial.displacementScale = 0.1;
+boulderMaterial.aoMap = boulderAo;
 
-// Groups
+boulderPane.addBinding(boulderMaterial, "metalness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+boulderPane.addBinding(boulderMaterial, "roughness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+boulderPane.addBinding(boulderMaterial, "displacementScale", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+boulderPane.addBinding(boulderMaterial, "aoMapIntensity", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+
+// space cruiser material
+const spaceCruiserPane = pane.addFolder({
+  title: "Space Cruiser Material",
+  expanded: true,
+});
+
+const spaceCruiserMaterial = new THREE.MeshStandardMaterial();
+spaceCruiserMaterial.map = spaceCruiserAlbedo;
+spaceCruiserMaterial.roughnessMap = spaceCruiserRoughness;
+spaceCruiserMaterial.metalnessMap = spaceCruiserMetallic;
+spaceCruiserMaterial.normalMap = spaceCruiserNormal;
+spaceCruiserMaterial.displacementMap = spaceCruiserHeight;
+spaceCruiserMaterial.displacementScale = 0.1;
+spaceCruiserMaterial.aoMap = spaceCruiserAo;
+
+spaceCruiserPane.addBinding(spaceCruiserMaterial, "metalness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+spaceCruiserPane.addBinding(spaceCruiserMaterial, "roughness", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+spaceCruiserPane.addBinding(spaceCruiserMaterial, "displacementScale", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+spaceCruiserPane.addBinding(spaceCruiserMaterial, "aoMapIntensity", {
+  min: 0,
+  max: 1,
+  step: 0.01,
+});
+
+// intialize a group
 const group = new THREE.Group();
 
-// Meshes
-// const triangle = new THREE.Mesh(triangleGeometry, material);
-const plane = new THREE.Mesh(planeGeometry, material);
-plane.position.x = -1.5;
+// initialize the mesh
 
-const cube = new THREE.Mesh(cubeGeometry, material);
+const grass = new THREE.Mesh();
+grass.geometry = geometry;
+grass.material = grassMaterial;
 
-const torusKnot = new THREE.Mesh(torusKnotGeometry, material);
-torusKnot.position.x = 1.5;
+const boulder = new THREE.Mesh();
+boulder.geometry = geometry;
+boulder.material = boulderMaterial;
+boulder.position.x = 2.5;
 
-const sphere = new THREE.Mesh(sphereGeometry, material);
-sphere.position.y = 1.5;
+const spaceCruiser = new THREE.Mesh();
+spaceCruiser.geometry = geometry;
+spaceCruiser.material = spaceCruiserMaterial;
+spaceCruiser.position.x = -2.5;
 
-const cylinder = new THREE.Mesh(cylinderGeometry, material);
-cylinder.position.y = -1.5;
-
-// scene.add(triangle);
-group.add(plane, cube, sphere, torusKnot, cylinder);
+// add the mesh to the scene
+group.add(grass, boulder, spaceCruiser);
 scene.add(group);
 
-// Renderer
-const canvas = document.querySelector("canvas.threejs");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+// initialize the light
+const light = new THREE.AmbientLight(0xffffff, 1);
+scene.add(light);
 
-// Axes
-const axes = new THREE.AxesHelper(3);
-scene.add(axes);
-
-// Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-scene.add(ambientLight);
-
-const pointLight = new THREE.PointLight(0xffffff, 100);
+const pointLight = new THREE.PointLight(0xffffff, 200);
 pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
-// Camera
+// initialize the camera
 const camera = new THREE.PerspectiveCamera(
   35,
   window.innerWidth / window.innerHeight,
   0.1,
-  200
+  10000
 );
-camera.position.z = 5;
+camera.position.z = 10;
+camera.position.y = 5;
 
-// Controls
-const controls = new OrbitControls(camera, renderer.domElement);
+// initialize the renderer
+const canvas = document.querySelector("canvas.threejs");
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: true,
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+// instantiate the controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
 window.addEventListener("resize", () => {
-  renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-const renderLoop = () => {
-  group.children.forEach((child) => {
-    child.rotation.y += 0.01;
-  });
+// render the scene
+const renderloop = () => {
+  // group.children.forEach((child) =>{
+  //   if (child instanceof THREE.Mesh) {
+  //     child.rotation.y += 0.01
+  //   }
+  // })
+
   controls.update();
   renderer.render(scene, camera);
-  requestAnimationFrame(renderLoop);
+  window.requestAnimationFrame(renderloop);
 };
 
-renderLoop();
+renderloop();
