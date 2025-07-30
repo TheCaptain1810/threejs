@@ -1,221 +1,158 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Pane } from "tweakpane";
 
-// initialize the pane
+// initialize pane
 const pane = new Pane();
 
 // initialize the scene
 const scene = new THREE.Scene();
 
-// initialize the loader
+// add textureLoader
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+cubeTextureLoader.setPath("static/textures/cubeMap/");
 
-// initialize the geometry
-const geometry = new THREE.SphereGeometry(1, 32, 32);
-const uv2Geometry = new THREE.BufferAttribute(geometry.attributes.uv.array, 2);
-geometry.setAttribute("uv2", uv2Geometry);
+// adding textures
+const sunTexture = textureLoader.load("static/textures/2k_sun.jpg");
+sunTexture.colorSpace = THREE.SRGBColorSpace;
+const mercuryTexture = textureLoader.load("static/textures/2k_mercury.jpg");
+mercuryTexture.colorSpace = THREE.SRGBColorSpace;
+const venusTexture = textureLoader.load("static/textures/2k_venus_surface.jpg");
+venusTexture.colorSpace = THREE.SRGBColorSpace;
+const earthTexture = textureLoader.load("static/textures/2k_earth_daymap.jpg");
+earthTexture.colorSpace = THREE.SRGBColorSpace;
+const marsTexture = textureLoader.load("static/textures/2k_mars.jpg");
+marsTexture.colorSpace = THREE.SRGBColorSpace;
+const moonTexture = textureLoader.load("static/textures/2k_moon.jpg");
+moonTexture.colorSpace = THREE.SRGBColorSpace;
 
-// load the grass textures
-const grassAlbedo = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_albedo.png"
-);
-grassAlbedo.colorSpace = THREE.SRGBColorSpace;
-const grassAo = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_ao.png"
-);
-const grassHeight = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_height.png"
-);
-const grassMetallic = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_metallic.png"
-);
-const grassNormal = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_normal-ogl.png"
-);
-const grassRoughness = textureLoader.load(
-  "static/textures/whispy-grass-meadow-bl/wispy-grass-meadow_roughness.png"
-);
+const backgroundCubemap = cubeTextureLoader.load([
+  "px.png",
+  "nx.png",
+  "py.png",
+  "ny.png",
+  "pz.png",
+  "nz.png",
+]);
 
-// load the boulder textures
-const boulderAlbedo = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_albedo.png"
-);
-boulderAlbedo.colorSpace = THREE.SRGBColorSpace;
-const boulderAo = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_ao.png"
-);
-const boulderHeight = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_height.png"
-);
-const boulderMetallic = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_metallic.png"
-);
-const boulderNormal = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_normal-ogl.png"
-);
-const boulderRoughness = textureLoader.load(
-  "static/textures/badlands-boulders-bl/badlands-boulders_roughness.png"
-);
+scene.background = backgroundCubemap;
 
-// load the space cruiser textures
-const spaceCruiserAlbedo = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_albedo.png"
-);
-spaceCruiserAlbedo.colorSpace = THREE.SRGBColorSpace;
-const spaceCruiserAo = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_ao.png"
-);
-const spaceCruiserHeight = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_height.png"
-);
-const spaceCruiserMetallic = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_metallic.png"
-);
-const spaceCruiserNormal = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_normal-ogl.png"
-);
-const spaceCruiserRoughness = textureLoader.load(
-  "static/textures/space-cruiser-panels2-bl/space-cruiser-panels2_roughness.png"
-);
-
-// grass material
-const grassPane = pane.addFolder({
-  title: "Grass Material",
-  expanded: true,
+// add materials
+const mercuryMaterial = new THREE.MeshStandardMaterial({
+  map: mercuryTexture,
+});
+const venusMaterial = new THREE.MeshStandardMaterial({
+  map: venusTexture,
+});
+const earthMaterial = new THREE.MeshStandardMaterial({
+  map: earthTexture,
+});
+const marsMaterial = new THREE.MeshStandardMaterial({
+  map: marsTexture,
+});
+const moonMaterial = new THREE.MeshStandardMaterial({
+  map: moonTexture,
 });
 
-const grassMaterial = new THREE.MeshStandardMaterial();
-grassMaterial.map = grassAlbedo;
-grassMaterial.roughnessMap = grassRoughness;
-grassMaterial.metalnessMap = grassMetallic;
-grassMaterial.normalMap = grassNormal;
-grassMaterial.displacementMap = grassHeight;
-grassMaterial.displacementScale = 0.1;
-grassMaterial.aoMap = grassAo;
-
-grassPane.addBinding(grassMaterial, "metalness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-grassPane.addBinding(grassMaterial, "roughness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-grassPane.addBinding(grassMaterial, "displacementScale", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-grassPane.addBinding(grassMaterial, "aoMapIntensity", {
-  min: 0,
-  max: 1,
-  step: 0.01,
+// add stuff here
+const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+const sunMaterial = new THREE.MeshBasicMaterial({
+  map: sunTexture,
 });
 
-// boulder material
-const boulderPane = pane.addFolder({
-  title: "Boulder Material",
-  expanded: true,
+const sun = new THREE.Mesh(sphereGeometry, sunMaterial);
+sun.scale.setScalar(5);
+scene.add(sun);
+
+const planets = [
+  {
+    name: "Mercury",
+    radius: 0.5,
+    distance: 10,
+    speed: 0.01,
+    material: mercuryMaterial,
+    moons: [],
+  },
+  {
+    name: "Venus",
+    radius: 0.8,
+    distance: 15,
+    speed: 0.007,
+    material: venusMaterial,
+    moons: [],
+  },
+  {
+    name: "Earth",
+    radius: 1,
+    distance: 20,
+    speed: 0.005,
+    material: earthMaterial,
+    moons: [
+      {
+        name: "Moon",
+        radius: 0.3,
+        distance: 3,
+        speed: 0.015,
+      },
+    ],
+  },
+  {
+    name: "Mars",
+    radius: 0.7,
+    distance: 25,
+    speed: 0.003,
+    material: marsMaterial,
+    moons: [
+      {
+        name: "Phobos",
+        radius: 0.1,
+        distance: 2,
+        speed: 0.02,
+      },
+      {
+        name: "Deimos",
+        radius: 0.2,
+        distance: 3,
+        speed: 0.015,
+        color: 0xffffff,
+      },
+    ],
+  },
+];
+
+const createPlanet = (planet) => {
+  const planetMesh = new THREE.Mesh(sphereGeometry, planet.material);
+  planetMesh.scale.setScalar(planet.radius);
+  planetMesh.position.x = planet.distance;
+  return planetMesh;
+};
+
+const createMoon = (moon) => {
+  const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+  moonMesh.scale.setScalar(moon.radius);
+  moonMesh.position.x = moon.distance;
+  return moonMesh;
+};
+
+const planetMeshes = planets.map((planet) => {
+  const planetMesh = createPlanet(planet);
+  scene.add(planetMesh);
+
+  planet.moons.forEach((moon) => {
+    const moonMesh = createMoon(moon);
+    planetMesh.add(moonMesh);
+  });
+  return planetMesh;
 });
 
-const boulderMaterial = new THREE.MeshStandardMaterial();
-boulderMaterial.map = boulderAlbedo;
-boulderMaterial.roughnessMap = boulderRoughness;
-boulderMaterial.metalnessMap = boulderMetallic;
-boulderMaterial.normalMap = boulderNormal;
-boulderMaterial.displacementMap = boulderHeight;
-boulderMaterial.displacementScale = 0.1;
-boulderMaterial.aoMap = boulderAo;
+console.log(planetMeshes);
 
-boulderPane.addBinding(boulderMaterial, "metalness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-boulderPane.addBinding(boulderMaterial, "roughness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-boulderPane.addBinding(boulderMaterial, "displacementScale", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-boulderPane.addBinding(boulderMaterial, "aoMapIntensity", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
+// add lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+scene.add(ambientLight);
 
-// space cruiser material
-const spaceCruiserPane = pane.addFolder({
-  title: "Space Cruiser Material",
-  expanded: true,
-});
-
-const spaceCruiserMaterial = new THREE.MeshStandardMaterial();
-spaceCruiserMaterial.map = spaceCruiserAlbedo;
-spaceCruiserMaterial.roughnessMap = spaceCruiserRoughness;
-spaceCruiserMaterial.metalnessMap = spaceCruiserMetallic;
-spaceCruiserMaterial.normalMap = spaceCruiserNormal;
-spaceCruiserMaterial.displacementMap = spaceCruiserHeight;
-spaceCruiserMaterial.displacementScale = 0.1;
-spaceCruiserMaterial.aoMap = spaceCruiserAo;
-
-spaceCruiserPane.addBinding(spaceCruiserMaterial, "metalness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-spaceCruiserPane.addBinding(spaceCruiserMaterial, "roughness", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-spaceCruiserPane.addBinding(spaceCruiserMaterial, "displacementScale", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-spaceCruiserPane.addBinding(spaceCruiserMaterial, "aoMapIntensity", {
-  min: 0,
-  max: 1,
-  step: 0.01,
-});
-
-// intialize a group
-const group = new THREE.Group();
-
-// initialize the mesh
-
-const grass = new THREE.Mesh();
-grass.geometry = geometry;
-grass.material = grassMaterial;
-
-const boulder = new THREE.Mesh();
-boulder.geometry = geometry;
-boulder.material = boulderMaterial;
-boulder.position.x = 2.5;
-
-const spaceCruiser = new THREE.Mesh();
-spaceCruiser.geometry = geometry;
-spaceCruiser.material = spaceCruiserMaterial;
-spaceCruiser.position.x = -2.5;
-
-// add the mesh to the scene
-group.add(grass, boulder, spaceCruiser);
-scene.add(group);
-
-// initialize the light
-const light = new THREE.AmbientLight(0xffffff, 1);
-scene.add(light);
-
-const pointLight = new THREE.PointLight(0xffffff, 200);
-pointLight.position.set(5, 5, 5);
+const pointLight = new THREE.PointLight(0xffffff, 1000);
 scene.add(pointLight);
 
 // initialize the camera
@@ -223,37 +160,48 @@ const camera = new THREE.PerspectiveCamera(
   35,
   window.innerWidth / window.innerHeight,
   0.1,
-  10000
+  400
 );
-camera.position.z = 10;
+camera.position.z = 100;
 camera.position.y = 5;
 
 // initialize the renderer
 const canvas = document.querySelector("canvas.threejs");
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-  antialias: true,
-});
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// instantiate the controls
+// add controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+controls.maxDistance = 200;
+controls.minDistance = 20;
 
+// add resize listener
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// render the scene
+// render loop
 const renderloop = () => {
-  // group.children.forEach((child) =>{
-  //   if (child instanceof THREE.Mesh) {
-  //     child.rotation.y += 0.01
-  //   }
-  // })
+  planetMeshes.forEach((planet, planetIndex) => {
+    planet.rotation.y += planets[planetIndex].speed;
+    planet.position.x =
+      Math.sin(planet.rotation.y) * planets[planetIndex].distance;
+    planet.position.z =
+      Math.cos(planet.rotation.y) * planets[planetIndex].distance;
+    planet.children.forEach((moon, moonIndex) => {
+      moon.rotation.y += planets[planetIndex].moons[moonIndex].speed;
+      moon.position.x =
+        Math.sin(moon.rotation.y) *
+        planets[planetIndex].moons[moonIndex].distance;
+      moon.position.z =
+        Math.cos(moon.rotation.y) *
+        planets[planetIndex].moons[moonIndex].distance;
+    });
+  });
 
   controls.update();
   renderer.render(scene, camera);
